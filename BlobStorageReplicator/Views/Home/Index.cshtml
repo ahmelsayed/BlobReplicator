@@ -1,0 +1,71 @@
+﻿@using BlobStorageReplicator.Code
+@model System.Tuple<BlobStorageReplicator.Models.BlobStorageModel, System.Collections.Generic.List<BlobStorageReplicator.Models.BlobStorageModel>>
+@{
+    ViewBag.Title = "Home";
+}
+
+@using (Html.BootstrapBeginForm("Index", "Home", FormMethod.Get))
+{
+    <fieldset>
+        <div class="form-group">
+            @Html.Label("AppSettings Storage Accounts", new { @class = "control-label col-xs-3" })
+            <select id="appsettings-storage-list" class="form-control" style="width: 30%" onchange="javascript: SelectionChanged(this);">
+                @if (Model.Item2.Count > 0)
+                {
+                    <option value="none"> Select a Storage Account </option>
+                }
+                @foreach (var blob in Model.Item2)
+                {
+                    <option value="@blob.SourceAccountKey"> @blob.SourceAccountName </option>
+                }
+            </select>
+        </div>
+    </fieldset>
+}
+
+@using (Html.BootstrapBeginForm("Index", "Home", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+
+    <fieldset>
+        <div class="form-group">
+            @Html.BootstrapLabelFor(model => model.Item1.SourceAccountName)
+
+            <div class="col-xs-4">
+                @Html.BootstrapTextBoxFor(model => model.Item1.SourceAccountName)
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.BootstrapLabelFor(model => model.Item1.SourceAccountKey)
+
+            <div class="col-xs-7">
+                @Html.BootstrapTextBoxFor(model => model.Item1.SourceAccountKey)
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.BootstrapLabelFor(model => model.Item1.TargetAccountName)
+
+            <div class="col-xs-4">
+                @Html.BootstrapTextBoxFor(model => model.Item1.TargetAccountName)
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.BootstrapLabelFor(model => model.Item1.TargetAccountKey)
+
+            <div class="col-xs-7">
+                @Html.BootstrapTextBoxFor(model => model.Item1.TargetAccountKey)
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-sm-offset-1 col-xs-10">
+                <button type="submit" class="btn btn-primary">Reblicate</button>
+            </div>
+        </div>
+    </fieldset>
+}
+
+<script src="~/Scripts/Home.js"></script>
