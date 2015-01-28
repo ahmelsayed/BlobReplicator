@@ -124,17 +124,24 @@ namespace BlobStorageReplicator.Code
                             new StorageCredentials(replicationToCarry.BlobStorages.TargetAccountName,
                                 replicationToCarry.BlobStorages.TargetAccountKey), false);
                     var targetBlobClient = targetAccount.CreateCloudBlobClient();
+                    var policy = new SharedAccessBlobPolicy
+                    {
+                        Permissions = SharedAccessBlobPermissions.Read,
+                        SharedAccessStartTime = null,
+                        SharedAccessExpiryTime = new DateTimeOffset(DateTime.Now.AddMinutes(60))
+                    };
                     foreach (var container in sourceBlobClient.ListContainers())
                     {
                         var sourceContainerReference = sourceBlobClient.GetContainerReference(container.Name);
                         var targetContainerReference = targetBlobClient.GetContainerReference(container.Name);
                         targetContainerReference.CreateIfNotExists();
                         targetContainerReference.SetPermissions(sourceContainerReference.GetPermissions());
+                        var sas = sourceContainerReference.GetSharedAccessSignature(policy);
                         foreach (var entry in container.ListBlobs(null, true))
                         {
                             var blobName = entry.Uri.PathAndQuery.Replace("/" + container.Name + "/", "");
                             var targetBlob = targetContainerReference.GetBlockBlobReference(blobName);
-                            targetBlob.StartCopyFromBlob(sourceContainerReference.GetBlockBlobReference(blobName));
+                            targetBlob.StartCopyFromBlob(new Uri(entry.Uri.AbsoluteUri + sas));
                         }
                     }
                     replicationToCarry.Status = ReplicationStatus.Submited;
